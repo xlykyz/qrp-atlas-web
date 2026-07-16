@@ -1,4 +1,5 @@
 import { apiRequest } from '@/shared/api/client';
+import { listCoveredTradingDates } from '@/shared/api/marketDates';
 import type {
   DailyQuoteDto,
   HealthResponse,
@@ -22,8 +23,7 @@ function queryString(values: Record<string, string | number | null | undefined>)
 export const todayApi = {
   getHealth: () => apiRequest<HealthResponse>('/api/health'),
   getStats: () => apiRequest<StatsResponse>('/api/stats'),
-  listTradingDates: (through: string, limit = 30) =>
-    apiRequest<string[]>(`/api/daily/dates?${queryString({ end_date: through, limit })}`),
+  listTradingDates: (through: string, limit = 30) => listCoveredTradingDates(through, limit),
   getDailySnapshot: (date: string) =>
     apiRequest<DailyQuoteDto[]>(`/api/daily?${queryString({ date, limit: 10000 })}`),
   getIndexSeries: (startDate: string, endDate: string) =>

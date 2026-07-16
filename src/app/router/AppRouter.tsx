@@ -10,6 +10,13 @@ const MarketReviewPage = lazy(() => import('@/domains/market-review/pages/Market
 const StocksPage = lazy(() => import('@/domains/stocks/pages/StocksPage').then((module) => ({ default: module.StocksPage })));
 const StockDetailPage = lazy(() => import('@/domains/stocks/pages/StockDetailPage').then((module) => ({ default: module.StockDetailPage })));
 const ResearchRecordsPage = lazy(() => import('@/domains/research-records/pages/ResearchRecordsPage').then((module) => ({ default: module.ResearchRecordsPage })));
+const ThemesPage = lazy(() => import('@/domains/themes/pages/ThemesPage').then((module) => ({ default: module.ThemesPage })));
+const ThemeDetailPage = lazy(() => import('@/domains/themes/pages/ThemeDetailPage').then((module) => ({ default: module.ThemeDetailPage })));
+const IndicatorsPage = lazy(() => import('@/domains/strategy-research/pages/IndicatorsPage').then((module) => ({ default: module.IndicatorsPage })));
+const FactorsPage = lazy(() => import('@/domains/strategy-research/pages/FactorsPage').then((module) => ({ default: module.FactorsPage })));
+const DeclarativeStrategiesPage = lazy(() => import('@/domains/strategy-research/pages/DeclarativeStrategiesPage').then((module) => ({ default: module.DeclarativeStrategiesPage })));
+const DeclarativeEditorPage = lazy(() => import('@/domains/strategy-research/pages/DeclarativeEditorPage').then((module) => ({ default: module.DeclarativeEditorPage })));
+const DeclarativeDetailPage = lazy(() => import('@/domains/strategy-research/pages/DeclarativeDetailPage').then((module) => ({ default: module.DeclarativeDetailPage })));
 const OperationsPage = lazy(() => import('@/domains/operations/pages/OperationsPage').then((module) => ({ default: module.OperationsPage })));
 const StrategiesPage = lazy(() => import('@/domains/backtests/pages/StrategiesPage').then((module) => ({ default: module.StrategiesPage })));
 const StrategyDetailPage = lazy(() => import('@/domains/backtests/pages/StrategyDetailPage').then((module) => ({ default: module.StrategyDetailPage })));
@@ -32,8 +39,15 @@ export function AppRouter() {
     <Route path="research/stocks" element={<StocksPage />} />
     <Route path="research/stocks/:ticker" element={<StockDetailPage />} />
     <Route path="research/notes" element={<ResearchRecordsPage />} />
+    <Route path="research/themes" element={<ThemesPage />} />
+    <Route path="research/themes/:themeId" element={<ThemeDetailPage />} />
     <Route path="research/*" element={<PlaceholderPage kind="research" />} />
     <Route path="strategies" element={<StrategiesPage />} />
+    <Route path="strategies/indicators" element={<IndicatorsPage />} />
+    <Route path="strategies/factors" element={<FactorsPage />} />
+    <Route path="strategies/declarative" element={<DeclarativeStrategiesPage />} />
+    <Route path="strategies/declarative/new" element={<DeclarativeEditorPage />} />
+    <Route path="strategies/declarative/:code/:version" element={<DeclarativeDetailPage />} />
     <Route path="strategies/:code" element={<StrategyDetailPage />} />
     <Route path="backtests" element={<BacktestsHomePage />} />
     <Route path="backtests/new" element={<NewBacktestPage />} />

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { CalendarDays, RefreshCw } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Button, ErrorState, LoadingState, PageHeader, StatusBadge } from '@/shared/ui';
+import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, StatusBadge } from '@/shared/ui';
 import { todayKeys, useTodayWorkspace, useTradingDates } from '../hooks/queries';
 import { ExtremeMovesPanel } from '../components/ExtremeMovesPanel';
 import { FreshnessPanel } from '../components/FreshnessPanel';
@@ -15,15 +15,15 @@ export function TodayPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const dates = useTradingDates();
   const requestedDate = searchParams.get('date');
-  const selectedDate = requestedDate || dates.data?.[0] || null;
+  const selectedDate = requestedDate || dates.data?.dates[0] || null;
   const workspace = useTodayWorkspace(selectedDate);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!requestedDate && dates.data?.[0]) {
+    if (!requestedDate && dates.data?.dates[0]) {
       setSearchParams((current) => {
         const next = new URLSearchParams(current);
-        next.set('date', dates.data?.[0] ?? '');
+        next.set('date', dates.data?.dates[0] ?? '');
         return next;
       }, { replace: true });
     }
@@ -52,11 +52,12 @@ export function TodayPage() {
 
   return <div className="stack today-page">
     <PageHeader eyebrow="每日启动" title="今日工作台" description="先确认市场事实、数据新鲜度与待处理任务，再带着交易日上下文进入复盘和研究。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>研究日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
-      <label className="date-control"><CalendarDays size={14} /><span>交易日</span><select className="select" value={selectedDate} onChange={(event) => setDate(event.target.value)} aria-label="选择交易日">{(dates.data ?? [selectedDate]).map((date) => <option key={date} value={date}>{date}</option>)}</select></label>
+    {dates.data?.rejectedCalendarDates.length ? <ContractDriftState title="交易日契约已校正" detail={<>后端日历返回了没有市场快照覆盖的日期 <code>{dates.data.rejectedCalendarDates.join('、')}</code>；页面已按 <code>daily_market_snapshot</code> 水位 {dates.data.marketWatermark ?? '未知'} 排除，并保留此告警。</>} /> : null}
+      <label className="date-control"><CalendarDays size={14} /><span>交易日</span><select className="select" value={selectedDate} onChange={(event) => setDate(event.target.value)} aria-label="选择交易日">{(dates.data?.dates ?? [selectedDate]).map((date) => <option key={date} value={date}>{date}</option>)}</select></label>
       <Button onClick={refresh}><RefreshCw size={14} />刷新</Button>
       <Link className="button button--primary button--md" to={`/review/market?date=${selectedDate}`}>开始复盘</Link>
     </>} />
-    <div className="today-context-line"><strong>{selectedDate === dates.data?.[0] ? '最新有效交易日' : '历史研究日'}</strong><span>页面中的市场、极端状态与下钻链接均固定到该日期。</span><span className="toolbar__spacer">URL 已保留 <code>?date={selectedDate}</code></span></div>
+    <div className="today-context-line"><strong>{selectedDate === dates.data?.dates[0] ? '最新有效交易日' : '历史研究日'}</strong><span>页面中的市场、极端状态与下钻链接均固定到该日期。</span><span className="toolbar__spacer">URL 已保留 <code>?date={selectedDate}</code></span></div>
     <MarketOverviewPanel date={selectedDate} rows={workspace.daily.data} phase={phase} limitUpCount={workspace.limitUps.data?.length} limitDownCount={workspace.limitDowns.data?.length} isLoading={workspace.daily.isLoading || workspace.limitUps.isLoading || workspace.limitDowns.isLoading || workspace.phase.isLoading} error={marketError} onRetry={() => { void workspace.daily.refetch(); void workspace.limitUps.refetch(); void workspace.limitDowns.refetch(); void workspace.phase.refetch(); }} />
     <div className="grid grid--main-aside today-primary-grid">
       <div className="stack">

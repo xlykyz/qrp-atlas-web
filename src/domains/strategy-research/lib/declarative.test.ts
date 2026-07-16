@@ -1,0 +1,2 @@
+import {describe,expect,it} from 'vitest';import {initialRuleDraft,toDefinition,validateDraft} from './declarative';
+describe('声明式策略表单适配',()=>{it('只生成受控字段/算子/字面量规则',()=>{expect(toDefinition(initialRuleDraft)).toMatchObject({code:'my_trend_rule',entry:{operator:'gt'},exit:{operator:'lt'}});});it('拒绝非法代码与版本',()=>{expect(validateDraft({...initialRuleDraft,code:'Bad-Code',version:'v1'})).toHaveLength(2);});});

@@ -1,4 +1,5 @@
 import { apiRequest } from '@/shared/api/client';
+import { listCoveredTradingDates } from '@/shared/api/marketDates';
 import type { Adjustment, DailyQuoteDto, ResearchVisitDto, StockDto, StockReportDto, TradeDto, TradeWrite } from '../types/models';
 
 function qs(values: Record<string, string | number | boolean | undefined>) {
@@ -8,7 +9,7 @@ function qs(values: Record<string, string | number | boolean | undefined>) {
 }
 
 export const stocksApi = {
-  listDates: (through: string, limit = 260) => apiRequest<string[]>(`/api/daily/dates?${qs({ end_date: through, limit })}`),
+  listDates: (through: string, limit = 260) => listCoveredTradingDates(through, limit),
   listStocks: (filters: { keyword?: string | undefined; exchange?: string | undefined; isActive?: boolean | undefined; limit: number; offset: number }) =>
     apiRequest<StockDto[]>(`/api/stock/list?${qs({ keyword: filters.keyword, exchange: filters.exchange, is_active: filters.isActive, limit: filters.limit, offset: filters.offset })}`),
   getStock: (ticker: string) => apiRequest<StockDto>(`/api/stock/${encodeURIComponent(ticker)}`),

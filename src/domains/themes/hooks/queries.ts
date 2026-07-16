@@ -1,0 +1,1 @@
+import{useQuery}from'@tanstack/react-query';import{themesApi}from'../api/themesApi';export const themeKeys={all:['themes']as const,evidence:()=>['themes','industry-evidence']as const};export const useIndustryEvidence=()=>useQuery({queryKey:themeKeys.evidence(),queryFn:()=>themesApi.listIndustryEvidence(),staleTime:300000});

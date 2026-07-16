@@ -1,35 +1,54 @@
 # QRP Atlas Web
 
-QRP Atlas Web 是 QRP Atlas 的正式个人专业交易研究终端。它从用户工作流出发，独立于后端仓库 `qrp-atlas` 与三维可视化应用 `qrp-global-atlas`。
+QRP Atlas Web 是 QRP Atlas 的正式个人专业交易研究终端，围绕每日工作、市场复盘、对象研究、策略实验、回测分析与运行诊断组织，而不是按后端模块堆叠菜单。
 
-## 产品边界
+## 仓库边界
 
-- `qrp-atlas`：数据、契约、指标、因子、策略、回测、研究服务、认证与 API。
-- `qrp-atlas-web`：日常研究、复盘、策略实验、回测分析与运行诊断的主 Web 产品。
-- `qrp-global-atlas`：独立的全球资本事件三维可视化终端；产品品牌一致，代码与主 Web 独立。
+- `qrp-atlas`：数据、契约、指标、因子、策略、回测、认证与 API。
+- `qrp-atlas-web`：正式主 Web，本仓库。
+- `qrp-global-atlas`：独立的全球资本事件三维终端，品牌一致、代码独立。
 
-本仓库不直接访问 DuckDB/PostgreSQL，不复制 Python 业务算法，不依赖旧 `qrp-atlas/web` UI。
+本仓库不访问 DuckDB/PostgreSQL，不复制 Python 算法，不依赖旧 `qrp-atlas/web` UI，也不会在 API 失败后自动切换 Mock。
 
-## SSOT 文档
+## 当前能力
 
-- [产品定位与用户工作流](docs/product/01-product-baseline.md)
-- [信息架构、页面地图与导航](docs/product/02-information-architecture.md)
-- [页面模板与交互原则](docs/product/03-page-templates-and-interactions.md)
-- [Design Tokens](docs/design-system/01-tokens.md)
-- [Design System 规范](docs/design-system/02-components.md)
-- [前端技术架构](docs/architecture/01-frontend-architecture.md)
-- [API 能力盘点与接口缺口](docs/audit/01-api-capability-inventory.md)
-- [旧前端能力迁移矩阵](docs/audit/02-legacy-migration-matrix.md)
-- [实施与验收方案](docs/delivery/01-implementation-and-acceptance.md)
-- [实施状态](docs/delivery/STATUS.md)
+- 今日工作台、市场复盘、个股研究、研究记录；
+- 指标目录、内置策略与声明式策略研究；
+- 因子研究契约边界；
+- 动态产业题材正式路由与证据/契约边界；
+- 回测创建、任务、结果、诊断与比较；
+- 数据覆盖、运行状态和 OpenAPI 契约诊断；
+- 上下文 Agent 抽屉（正式 Agent API 尚未部署，不提供假聊天）。
 
-## 本地环境
+## 运行
 
-工程底座将在阶段二建立。约定 API 环境变量：
+要求 Node.js 20+。API 地址必须显式配置：
 
-```env
-VITE_API_BASE_URL=http://127.0.0.1:8000
-VITE_API_TIMEOUT_MS=20000
+```powershell
+Copy-Item .env.example .env.local
+npm ci
+npm run dev
 ```
 
-远程开发可指向局域网或部署后的 HTTPS API。正式流程不会在请求失败后自动切换 Mock。
+`.env.local` 示例：
+
+```env
+VITE_API_BASE_URL=http://192.168.0.102:8000
+VITE_API_TIMEOUT_MS=120000
+VITE_ENABLE_QUERY_DEVTOOLS=false
+```
+
+未配置 `VITE_API_BASE_URL` 时应用会明确报错，不会静默连接硬编码地址。生产环境应使用 HTTPS API。
+
+## 质量门禁
+
+```powershell
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
+
+## SSOT
+
+产品、设计、架构、审计与交付文档位于 `docs/`。当前状态见 `docs/delivery/STATUS.md`。

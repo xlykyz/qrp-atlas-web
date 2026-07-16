@@ -1,6 +1,8 @@
 import { Activity, Bot, Command, Globe2 } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { env } from '@/shared/config/env';
+import { AgentDrawer } from './AgentDrawer';
 
 const nav = [
   { to: '/today', label: '今日' },
@@ -17,6 +19,7 @@ const contextNames: Record<string, string> = {
 
 export function AppShell() {
   const location = useLocation();
+  const [agentOpen, setAgentOpen] = useState(false);
   const section = location.pathname.split('/').filter(Boolean)[0] ?? 'today';
   return (
     <div className="app-frame">
@@ -26,7 +29,7 @@ export function AppShell() {
           {nav.map((item) => <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? 'active' : undefined}>{item.label}</NavLink>)}
         </nav>
         <div className="header-status"><Activity size={13} /><span>API</span><code>{new URL(env.apiBaseUrl).host}</code></div>
-        <button className="header-action" type="button" title="Agent 上下文研究将在后续阶段接入"><Bot size={16} /><span>研究 Agent</span></button>
+        <button className="header-action" type="button" aria-expanded={agentOpen} onClick={() => setAgentOpen(true)}><Bot size={16} /><span>研究 Agent</span></button>
         <span className="command-hint"><Command size={13} />K</span>
       </header>
       <div className="context-bar">
@@ -34,6 +37,7 @@ export function AppShell() {
         <div className="context-bar__meta"><span>上下文由 URL 保留</span><span>数据源：QRP Atlas API</span><span>Mock 回退：关闭</span></div>
       </div>
       <main className="app-main"><Outlet /></main>
+      <AgentDrawer open={agentOpen} onClose={() => setAgentOpen(false)} pathname={location.pathname} search={location.search} />
     </div>
   );
 }
