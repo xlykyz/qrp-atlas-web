@@ -56,6 +56,6 @@ export function StockDetailPage() {
     {tab === 'overview' ? <StockOverviewPanel stock={stock.data} rows={data.daily.data} range={range} adjustment={adjustment} isLoading={data.daily.isLoading} error={data.daily.error} onRetry={() => void data.daily.refetch()} /> : null}
     {tab === 'research' ? <ResearchEvidencePanel reports={data.reports.data} visits={data.visits.data} isLoading={data.reports.isLoading || data.visits.isLoading} error={data.reports.error ?? data.visits.error} onRetry={() => { void data.reports.refetch(); void data.visits.refetch(); }} /> : null}
     {tab === 'trades' ? <TradeJournalPanel ticker={stock.data.ticker} date={selectedDate} rows={data.trades.data} isLoading={data.trades.isLoading} error={data.trades.error} onRetry={() => void data.trades.refetch()} /> : null}
-    {tab === 'notes' ? <CapabilityUnavailable title="通用研究记录尚未接入" contract="GET/POST /api/research/notes?object_type=stock&object_id={ticker}" /> : null}
+    {tab === 'notes' ? <CapabilityUnavailable title="通用研究记录尚未接入" contract="GET/POST /api/research-notes?object_type=stock&object_id={ticker}" /> : null}
   </div>;
 }

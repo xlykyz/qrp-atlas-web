@@ -35,7 +35,7 @@ export function StocksPage() {
   });
 
   return <div className="stack stock-list-page">
-    <PageHeader eyebrow="对象发现" title="个股研究" description="从股票主数据定位研究对象，并将交易日上下文带入价格、证据、交易和研究记录。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>研究日 {selectedDate}</span><span>第 {page + 1} 页</span></>} actions={<Link className="button button--secondary button--md" to={`/review/market?date=${selectedDate}`}>返回市场复盘</Link>} />
+    <PageHeader eyebrow="对象发现" title="个股研究" description="从股票主数据定位研究对象，并将交易日上下文带入价格、证据、交易和研究记录。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>研究日 {selectedDate}</span><span>第 {page + 1} 页</span></>} actions={<><Link className="button button--secondary button--md" to="/research/notes">研究记录</Link><Link className="button button--secondary button--md" to={`/review/market?date=${selectedDate}`}>返回市场复盘</Link></>} />
     <Panel><PanelHeader title="股票筛选" meta="代码、名称、交易所与在市状态由后端过滤" /><PanelBody><div className="stock-filterbar">
       <label className="market-search stock-search"><Search size={14} /><input value={keyword} onChange={(event) => update('query', event.target.value)} placeholder="输入代码或名称" aria-label="搜索股票" /></label>
       <select className="select" value={exchange} onChange={(event) => update('exchange', event.target.value)} aria-label="筛选交易所"><option value="">全部交易所</option><option value="SH">上海</option><option value="SZ">深圳</option><option value="BJ">北京</option></select>

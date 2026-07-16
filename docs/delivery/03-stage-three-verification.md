@@ -190,7 +190,48 @@ npm run test       # 9 files / 22 tests 通过
 npm run build      # 通过；股票列表、详情与 lightweight-charts 均独立拆包
 ```
 
-## 5. 后续分域
+## 5. 研究记录 `/research/notes?from=&to=&kind=&query=`
 
-- 研究记录：待实现；
+### 5.1 产品范围
+
+后端尚无通用 research-note API，本域没有使用 localStorage 或 Mock 冒充保存。已完成：
+
+- 以真实 `/api/phase` 和 `/api/trades` 建立专用记录索引；
+- 将市场阶段与交易事实适配为统一、可下钻的时间记录，不改变后端语义；
+- 日期范围、来源和文本筛选写入 URL；
+- 日期范围无效时停止请求并展示明确校验状态；
+- 独立显示每个真实记录源的 loading、success、error 和数据条数；
+- 通用研究记录明确要求 SSOT 中既定的 `GET/POST/PATCH /api/research-notes` 契约；
+- 个股研究的研究记录 tab 与本页使用相同契约名称。
+
+### 5.2 真实 API 与浏览器验收
+
+验收范围：`2025-07-16` 至 `2026-07-16`。
+
+真实 API 返回：
+
+- 市场阶段判断 0 条；
+- 交易记录 0 条；
+- 两个接口均成功，页面显示“可用但业务空数据”；
+- 通用研究记录路由不存在，页面显示“未部署”，不混同为空数据。
+
+浏览器检查结果：
+
+- 首次打开自动将默认日期范围写入 URL；
+- 来源筛选写入 `kind=phase|trade`；
+- `from > to` 的 URL 显示“日期范围无效”并停止记录查询；
+- 1280×720 与 800×900 均无页面级横向溢出，窄屏筛选区和主从布局正确退化；
+- 控制台无应用 error / warning。
+
+### 5.3 自动化门禁
+
+```text
+npm run lint       # 通过
+npm run typecheck  # TypeScript strict 通过
+npm run test       # 10 files / 24 tests 通过
+npm run build      # 通过；ResearchRecordsPage 独立拆包
+```
+
+## 6. 后续分域
+
 - 系统数据诊断：待实现。

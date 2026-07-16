@@ -9,6 +9,7 @@ const TodayPage = lazy(() => import('@/domains/today/pages/TodayPage').then((mod
 const MarketReviewPage = lazy(() => import('@/domains/market-review/pages/MarketReviewPage').then((module) => ({ default: module.MarketReviewPage })));
 const StocksPage = lazy(() => import('@/domains/stocks/pages/StocksPage').then((module) => ({ default: module.StocksPage })));
 const StockDetailPage = lazy(() => import('@/domains/stocks/pages/StockDetailPage').then((module) => ({ default: module.StockDetailPage })));
+const ResearchRecordsPage = lazy(() => import('@/domains/research-records/pages/ResearchRecordsPage').then((module) => ({ default: module.ResearchRecordsPage })));
 const StrategiesPage = lazy(() => import('@/domains/backtests/pages/StrategiesPage').then((module) => ({ default: module.StrategiesPage })));
 const StrategyDetailPage = lazy(() => import('@/domains/backtests/pages/StrategyDetailPage').then((module) => ({ default: module.StrategyDetailPage })));
 const BacktestsHomePage = lazy(() => import('@/domains/backtests/pages/BacktestsHomePage').then((module) => ({ default: module.BacktestsHomePage })));
@@ -29,6 +30,7 @@ export function AppRouter() {
     <Route path="research" element={<Navigate to="/research/stocks" replace />} />
     <Route path="research/stocks" element={<StocksPage />} />
     <Route path="research/stocks/:ticker" element={<StockDetailPage />} />
+    <Route path="research/notes" element={<ResearchRecordsPage />} />
     <Route path="research/*" element={<PlaceholderPage kind="research" />} />
     <Route path="strategies" element={<StrategiesPage />} />
     <Route path="strategies/:code" element={<StrategyDetailPage />} />
