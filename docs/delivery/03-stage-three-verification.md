@@ -133,8 +133,64 @@ npm run test       # 8 files / 19 tests 通过
 npm run build      # 通过；路由级拆包后无 >500 kB chunk 警告
 ```
 
-## 4. 后续分域
+## 4. 个股研究
 
-- 个股研究：待实现；
+正式路由：
+
+```text
+/research/stocks?date=&query=&exchange=&active=&page=
+/research/stocks/:ticker?date=&adjustment=&range=&tab=
+```
+
+### 4.1 产品范围与代码边界
+
+已完成：
+
+- 股票主数据的后端搜索、交易所/在市状态筛选和分页；
+- 从市场复盘或股票列表进入对象详情，并保留 as-of 交易日；
+- 统一适配纯数字代码与带交易所后缀代码，不在页面猜测接口格式；
+- `raw/qfq/hfq` 复权模式、`3m/6m/1y/3y` 窗口和详情 tab 写入 URL；
+- K 线、成交量和区间指标；图表只接收纯展示 series，不直接请求 API；
+- 股票主数据、券商研报、机构调研、原始附件和证据正文；
+- 交易记录查询与真实创建表单，明确声明其不是实盘下单；
+- 通用研究记录 API 缺失时显示所需契约，不用本地数据或 Mock 伪装保存；
+- 行情、证据和交易的 loading、empty、error、partial/stale 和 success 状态。
+
+新增独立 `src/domains/stocks/`，页面仅组合 URL、查询和 domain 组件。价格转换、代码适配、DTO、查询、图表、证据和交易表单均已下沉。后端 `position_pct` 未声明单位，界面只显示“仓位原始值”，没有擅自解释为百分比。
+
+### 4.2 真实 API 与浏览器验收
+
+验收对象：`300438.SZ 鹏辉能源`，as-of：`2026-07-16`。
+
+真实返回并展示：
+
+- 243 个近一年交易日，前复权收盘 62.11，当日 -10.00%；
+- 近一年展示涨跌 140.09%，区间最高 92.70、最低 25.41；
+- K 线和成交量由真实 `/api/daily` 数据绘制，共 7 个有效 canvas 层；
+- 最新券商研报标题、机构、评级、正文和原始 PDF 附件；
+- 真实交易记录查询为空时展示业务空态。
+
+浏览器检查结果：
+
+- 搜索“鹏辉能源”后 URL 保存 `query`，列表唯一返回 `300438.SZ`；
+- 对象详情 URL 完整保存 `date/adjustment/range/tab`；
+- 切换“后复权 + 6 月”后 URL 和图表口径同步；
+- 展开研报后正文长度 815 字符，原始附件 URL 可追溯；
+- 交易 tab 提供真实创建表单，未为验收向业务库写入虚构交易；
+- 研究记录 tab 明确显示 `GET/POST /api/research/notes` 契约缺口；
+- 1280×720 和 800×900 实际视口无页面级横向溢出；800px 下对象控制、指标带和主从布局合理退化；
+- 浏览器控制台无应用 error / warning。
+
+### 4.3 自动化门禁
+
+```text
+npm run lint       # 通过
+npm run typecheck  # TypeScript strict 通过
+npm run test       # 9 files / 22 tests 通过
+npm run build      # 通过；股票列表、详情与 lightweight-charts 均独立拆包
+```
+
+## 5. 后续分域
+
 - 研究记录：待实现；
 - 系统数据诊断：待实现。
