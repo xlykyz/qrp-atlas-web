@@ -284,6 +284,37 @@ npm run build      # 通过；OperationsPage 独立拆包
 
 本轮要求的今日工作台、市场复盘、个股研究、研究记录和系统数据诊断均已按独立 domain 交付，并在真实 API、桌面/窄屏浏览器、自动化门禁和生产构建四个层面验收。
 
+### 7.1 跨路由最终回归
+
+最终以 1280×720 视口依次通过以下真实 API 页面：
+
+```text
+/today?date=2026-07-16
+/review/market?date=2026-07-16
+/research/stocks?date=2026-07-16
+/research/stocks/300438.SZ?date=2026-07-16&adjustment=qfq&range=1y&tab=overview
+/research/notes?from=2025-07-16&to=2026-07-16
+/operations
+```
+
+六个路由均满足：
+
+- App Shell 一级导航状态正确；
+- API host 明确为 `192.168.0.102:8000`；
+- 真实数据或明确业务空态完成渲染；
+- 页面级横向溢出为 0；
+- 没有未处理的 error state；
+- 浏览器控制台无 error / warning。
+
+阶段三最终全量门禁：
+
+```text
+npm run lint       # 通过
+npm run typecheck  # TypeScript strict 通过
+npm run test       # 11 files / 27 tests 通过
+npm run build      # 通过；最大业务页面 chunk 22.31 kB，图表库独立 chunk
+```
+
 仍受后端契约约束的能力：
 
 - 通用研究记录 CRUD 与对象引用；
