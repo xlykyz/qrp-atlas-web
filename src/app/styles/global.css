@@ -415,3 +415,5 @@ pre.code-block { max-width: 100%; overflow: auto; margin: 0; padding: 12px; bord
 .agent-context code { overflow-wrap: anywhere; }
 .agent-scope { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
 @media(max-width:800px){.catalog-filter,.definition-grid{grid-template-columns:1fr}.rule-grid{grid-template-columns:1fr}.rule-grid section{grid-template-columns:1fr}.form-span-2{grid-column:auto}.definition-row{grid-template-columns:1fr}.state-banner{align-items:flex-start;flex-wrap:wrap}.agent-drawer{width:100vw}}
+
+.state-block code, .state-banner code { overflow-wrap: anywhere; word-break: break-word; }
