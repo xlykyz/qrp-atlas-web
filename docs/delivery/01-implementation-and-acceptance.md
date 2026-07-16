@@ -121,7 +121,7 @@ npm run build
 - 表单错误定位、提交 pending、后端 detail；
 - TaskStatus 停止轮询；
 - Run tabs 的局部 artifact 失败；
-- Compare run add/remove 和最多 10；
+- Compare run add/remove 和最多 6；
 - ErrorBoundary fallback。
 
 ### 集成测试（MSW）

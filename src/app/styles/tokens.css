@@ -1,0 +1,36 @@
+:root {
+  font-family: Inter, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  color: #1d2420;
+  background: #f4f5f3;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --canvas: #f4f5f3;
+  --surface: #ffffff;
+  --surface-subtle: #f8f9f7;
+  --line: #dde0dc;
+  --line-strong: #c6cbc5;
+  --text: #1d2420;
+  --muted: #68716b;
+  --faint: #8a928d;
+  --header: #202722;
+  --header-hover: #2c352f;
+  --accent: #17724b;
+  --accent-hover: #115e3d;
+  --accent-soft: #e8f4ed;
+  --info: #316c9e;
+  --info-soft: #eaf2f8;
+  --warning: #9a6816;
+  --warning-soft: #fff4dc;
+  --special: #72549a;
+  --special-soft: #f1ecf7;
+  --market-up: #b13e3e;
+  --market-up-soft: #fbecec;
+  --market-down: #17724b;
+  --danger: #b13e3e;
+  --danger-soft: #fbecec;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-float: 0 4px 18px rgba(30, 40, 33, 0.08);
+  --shadow-drawer: -10px 0 30px rgba(20, 30, 23, 0.16);
+}
