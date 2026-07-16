@@ -31,3 +31,7 @@
 - 数据更新任务、补算、重试与正式数据集 SLA；
 - Agent session/message/citation/tool-permission API；
 - 认证 UI 与生产 SSO/Token 生命周期仍需部署方案验证。
+
+## 最终结论
+
+阶段一至阶段四的产品与工程交付完成，详见 `06-final-acceptance.md`。生产切换仍等待服务端未来时间戳问题解除；旧前端未删除。
