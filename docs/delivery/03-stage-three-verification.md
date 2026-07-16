@@ -232,6 +232,65 @@ npm run test       # 10 files / 24 tests 通过
 npm run build      # 通过；ResearchRecordsPage 独立拆包
 ```
 
-## 6. 后续分域
+## 6. 系统运行与诊断 `/operations?tab=overview|data|jobs|diagnostics`
 
-- 系统数据诊断：待实现。
+### 6.1 产品范围
+
+已完成：
+
+- API 健康、数据库大小、已连接表、数据参考日和运行时 OpenAPI 版本；
+- 22 个真实数据集的行数、日期覆盖、相对参考日和状态；
+- 数据集名称与状态筛选写入 URL；
+- 关键市场/研究数据就绪度与空表诊断；
+- 将前端当前必需与计划契约和 runtime OpenAPI 逐项比较；
+- 数据更新任务、回测任务部署缺口明确展示，不以 SQL 或通用表浏览替代；
+- 后端返回的数据库绝对路径在 adapter 展示转换中只保留文件名；
+- 新鲜度容忍值明确标识为前端临时诊断口径，正式 SLA 仍要求 `/api/operations/datasets` 返回。
+
+### 6.2 真实 API 与浏览器验收
+
+真实环境：`http://192.168.0.102:8000`。
+
+实际诊断结果：
+
+- API `status=ok`，连接 22 张业务表；
+- 数据库大小 4.67 GB，界面仅显示 `quant.db`；
+- 数据参考日 `2026-07-16`；
+- 22 个数据集中 3 个空表：业绩预告事件、市场阶段判断、交易记录；
+- runtime OpenAPI 版本 0.1.0，共 28 paths；
+- 应用诊断清单 18 项，11 项已部署；
+- 4 个当前必需契约缺失：策略目录、回测任务、结果诊断、运行比较；
+- 数据运行和数据集状态两个计划契约未部署。
+
+浏览器检查结果：
+
+- `tab=data&state=empty` 精确返回 3 个空表；继续搜索“交易”只返回 `trade_execution`，筛选写入 URL；
+- 运行任务 tab 不提供 SQL 链接，明确区分数据任务契约缺失与 live 回测部署漂移；
+- 契约诊断 tab 展示 18 行并准确列出 4 个当前必需缺口；
+- 页面正文不包含 `/home/...` 数据库绝对路径；
+- 1280×720 与 800×900 均无页面级横向溢出；
+- 浏览器控制台无应用 error / warning。
+
+### 6.3 自动化门禁
+
+```text
+npm run lint       # 通过
+npm run typecheck  # TypeScript strict 通过
+npm run test       # 11 files / 27 tests 通过
+npm run build      # 通过；OperationsPage 独立拆包
+```
+
+## 7. 阶段三结论
+
+本轮要求的今日工作台、市场复盘、个股研究、研究记录和系统数据诊断均已按独立 domain 交付，并在真实 API、桌面/窄屏浏览器、自动化门禁和生产构建四个层面验收。
+
+仍受后端契约约束的能力：
+
+- 通用研究记录 CRUD 与对象引用；
+- 正式数据集 SLA、更新任务、补算和重试；
+- live API 升级到 current-main，恢复策略目录、回测任务、扩展结果和比较；
+- 动态产业题材正式 API；
+- `position_pct` 单位定义；
+- 长期市场复盘聚合接口。
+
+这些缺口均以 unavailable、partial 或 contract drift 状态展示，没有用 Mock 或浏览器业务逻辑掩盖。

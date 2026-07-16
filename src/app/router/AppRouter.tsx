@@ -10,6 +10,7 @@ const MarketReviewPage = lazy(() => import('@/domains/market-review/pages/Market
 const StocksPage = lazy(() => import('@/domains/stocks/pages/StocksPage').then((module) => ({ default: module.StocksPage })));
 const StockDetailPage = lazy(() => import('@/domains/stocks/pages/StockDetailPage').then((module) => ({ default: module.StockDetailPage })));
 const ResearchRecordsPage = lazy(() => import('@/domains/research-records/pages/ResearchRecordsPage').then((module) => ({ default: module.ResearchRecordsPage })));
+const OperationsPage = lazy(() => import('@/domains/operations/pages/OperationsPage').then((module) => ({ default: module.OperationsPage })));
 const StrategiesPage = lazy(() => import('@/domains/backtests/pages/StrategiesPage').then((module) => ({ default: module.StrategiesPage })));
 const StrategyDetailPage = lazy(() => import('@/domains/backtests/pages/StrategyDetailPage').then((module) => ({ default: module.StrategyDetailPage })));
 const BacktestsHomePage = lazy(() => import('@/domains/backtests/pages/BacktestsHomePage').then((module) => ({ default: module.BacktestsHomePage })));
@@ -41,7 +42,8 @@ export function AppRouter() {
     <Route path="backtests/runs" element={<RunsPage />} />
     <Route path="backtests/runs/:runId" element={<RunDetailPage />} />
     <Route path="backtests/compare" element={<ComparePage />} />
-    <Route path="operations/*" element={<PlaceholderPage kind="operations" />} />
+    <Route path="operations" element={<OperationsPage />} />
+    <Route path="operations/*" element={<OperationsPage />} />
     <Route path="*" element={<NotFoundPage />} />
   </Route></Routes></Suspense></BrowserRouter>;
 }
