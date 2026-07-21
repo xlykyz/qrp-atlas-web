@@ -30,6 +30,8 @@ npm ci
 npm run dev
 ```
 
+开发服务固定运行在 `http://localhost:5120`，生产预览固定使用 `5121`。
+
 `.env.local` 示例：
 
 ```env
