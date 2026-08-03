@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, StatusBadge } from '@/shared/ui';
 import { todayKeys, useTodayWorkspace, useTradingDates } from '../hooks/queries';
-import { useActiveEpisodes, useLatestProductionRun, usePoolSnapshot, useSystemBSummary, systemBKeys } from '../hooks/useSystemB';
+import { useActiveEpisodes, usePoolSnapshot, useSystemBSummary, systemBKeys } from '../hooks/useSystemB';
 import { ActiveListPanel } from '../components/ActiveListPanel';
 import { ExtremeMovesPanel } from '../components/ExtremeMovesPanel';
 import { FreshnessPanel } from '../components/FreshnessPanel';
@@ -26,21 +26,17 @@ export function TodayPage() {
 
   // ── System B monitoring data ──────────────────────────────────
   const systemBSummary = useSystemBSummary(selectedDate);
-  const systemBProductionRun = useLatestProductionRun();
   const activeEpisodes = useActiveEpisodes(selectedDate);
   const poolSnapshot = usePoolSnapshot(selectedDate);
-  const [selectedPool, setSelectedPool] = useState<string | null>(null);
+  const [selectedPoolState, setSelectedPoolState] = useState<{ date: string | null; pool: string | null }>({ date: null, pool: null });
+  const selectedPool = selectedPoolState.date === selectedDate ? selectedPoolState.pool : null;
+  const activeSelectedPool = poolSnapshot.error ? null : selectedPool;
 
   // Flatten pool members for cross-filter and badge display in ActiveListPanel.
   const poolMembers: PoolMemberDto[] = useMemo(() => {
     if (!poolSnapshot.data) return [];
     return poolSnapshot.data.pools.flatMap((p) => p.members);
   }, [poolSnapshot.data]);
-
-  // Reset pool filter when date changes (pool membership is date-specific).
-  useEffect(() => {
-    setSelectedPool(null);
-  }, [selectedDate]);
 
   useEffect(() => {
     if (!requestedDate && dates.data?.dates[0]) {
@@ -71,6 +67,9 @@ export function TodayPage() {
     next.set('date', value);
     setSearchParams(next);
   };
+  const setSelectedPool = (pool: string | null) => {
+    setSelectedPoolState({ date: selectedDate, pool });
+  };
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: todayKeys.all });
     void queryClient.invalidateQueries({ queryKey: systemBKeys.all });
@@ -88,10 +87,9 @@ export function TodayPage() {
     <SystemBStatusPanel
       date={selectedDate}
       summary={systemBSummary.data}
-      productionRun={systemBProductionRun.data}
-      isLoading={systemBSummary.isLoading || systemBProductionRun.isLoading}
-      error={systemBSummary.error ?? systemBProductionRun.error}
-      onRetry={() => { void systemBSummary.refetch(); void systemBProductionRun.refetch(); }}
+      isLoading={systemBSummary.isLoading}
+      error={systemBSummary.error}
+      onRetry={() => void systemBSummary.refetch()}
     />
     <PoolFilterPanel
       snapshot={poolSnapshot.data}
@@ -104,7 +102,7 @@ export function TodayPage() {
     <ActiveListPanel
       episodes={activeEpisodes.data}
       poolMembers={poolMembers}
-      selectedPool={selectedPool}
+      selectedPool={activeSelectedPool}
       isLoading={activeEpisodes.isLoading}
       error={activeEpisodes.error}
       onRetry={() => void activeEpisodes.refetch()}

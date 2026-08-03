@@ -30,6 +30,7 @@ import {
   formatDays,
   formatDrawdown,
   formatEpisodeReturn,
+  poolLabel,
   poolShortLabel,
   poolTone,
 } from '../lib/systemBFormat';
@@ -85,7 +86,8 @@ export function ActiveListPanel({
     return { poolAssetIdsByType: byType, poolTypesByAsset: byAsset };
   }, [poolMembers]);
 
-  // Filter, sort, and slice.
+  // Filter and sort. Slicing happens after filtering so the counts can
+  // distinguish all matches from the rows visible in top30 mode.
   const filteredAndSorted = useMemo(() => {
     if (!episodes) return [];
 
@@ -118,15 +120,14 @@ export function ActiveListPanel({
       return bv - av;
     });
 
-    // Slice for top30 mode
-    if (displayMode === 'top30') {
-      return sorted.slice(0, TOP_N);
-    }
     return sorted;
-  }, [episodes, selectedPool, searchQuery, sortKey, displayMode, poolAssetIdsByType]);
+  }, [episodes, selectedPool, searchQuery, sortKey, poolAssetIdsByType]);
 
   const totalCount = episodes?.length ?? 0;
-  const filteredCount = filteredAndSorted.length;
+  const matchedCount = filteredAndSorted.length;
+  const displayedEpisodes = displayMode === 'top30' ? filteredAndSorted.slice(0, TOP_N) : filteredAndSorted;
+  const displayedCount = displayedEpisodes.length;
+  const selectedPoolLabel = selectedPool ? poolLabel(selectedPool) : null;
 
   return (
     <Panel>
@@ -134,8 +135,8 @@ export function ActiveListPanel({
         title="ACTIVE 强势清单 ★灵魂★"
         meta={
           selectedPool
-            ? `筛选: ${selectedPool} ∩ ACTIVE · 显示 ${filteredCount} / ${totalCount} 只 ACTIVE`
-            : `显示 ${filteredCount} / ${totalCount} 只 ACTIVE`
+            ? `筛选: ${selectedPoolLabel} ∩ ACTIVE · 显示 ${displayedCount} / 匹配 ${matchedCount} / 总计 ${totalCount} 只 ACTIVE`
+            : `显示 ${displayedCount} / 匹配 ${matchedCount} / 总计 ${totalCount} 只 ACTIVE`
         }
         actions={
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -214,8 +215,8 @@ export function ActiveListPanel({
               <span className="toolbar__spacer" />
               <span style={{ color: 'var(--muted)', fontSize: '11px' }}>
                 {selectedPool
-                  ? `${selectedPool} ∩ ACTIVE: ${filteredCount} 只`
-                  : `共 ${totalCount} 只 ACTIVE`}
+                  ? `${selectedPoolLabel} ∩ ACTIVE: 匹配 ${matchedCount} 只`
+                  : `匹配 ${matchedCount} / 总计 ${totalCount} 只 ACTIVE`}
               </span>
             </div>
 
@@ -237,7 +238,7 @@ export function ActiveListPanel({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAndSorted.map((episode) => {
+                  {displayedEpisodes.map((episode) => {
                     const pools = poolTypesByAsset.get(episode.asset_id) ?? [];
                     return (
                       <tr key={episode.asset_id}>
@@ -289,11 +290,11 @@ export function ActiveListPanel({
                       </tr>
                     );
                   })}
-                  {filteredAndSorted.length === 0 ? (
+                  {displayedEpisodes.length === 0 ? (
                     <tr>
                       <td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)' }}>
                         {selectedPool
-                          ? `${selectedPool} 池中没有 ACTIVE 股票`
+                          ? `${selectedPoolLabel}中没有 ACTIVE 股票`
                           : '没有匹配搜索条件的 ACTIVE 股票'}
                       </td>
                     </tr>

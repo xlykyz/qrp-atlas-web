@@ -6,6 +6,7 @@
  */
 
 import { apiRequest } from '@/shared/api/client';
+import { ApiError } from '@/shared/api/errors';
 import type {
   ActiveEpisodeDto,
   PoolSnapshotResponse,
@@ -19,6 +20,22 @@ function queryString(values: Record<string, string | number | null | undefined>)
     if (value !== null && value !== undefined && value !== '') params.set(key, String(value));
   });
   return params.toString();
+}
+
+function hasNotReadyCode(error: unknown, codes: readonly string[]): boolean {
+  if (!(error instanceof ApiError) || error.status !== 404) return false;
+  const detail = error.detail?.toUpperCase() ?? '';
+  return codes.some((code) => detail.includes(code));
+}
+
+/** The summary endpoint uses a date-specific not-ready response after the backend repair. */
+export function isSystemBSummaryNotReadyError(error: unknown): boolean {
+  return hasNotReadyCode(error, ['SYSTEM_B_SUMMARY_NOT_READY', 'SYSTEM_B_NOT_READY', 'NO_COMPLETED_SYSTEM_B_RUN']);
+}
+
+/** The date-specific pool snapshot can be unavailable before all three pools complete. */
+export function isPoolSnapshotNotReadyError(error: unknown): boolean {
+  return hasNotReadyCode(error, ['POOL_SNAPSHOT_NOT_READY', 'POOL_NOT_READY', 'NO_COMPLETED_POOL_RUN']);
 }
 
 export const systemBApi = {

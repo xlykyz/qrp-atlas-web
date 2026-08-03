@@ -4,10 +4,10 @@
  * Displays:
  *   - Five state distribution cards (BASE / CANDIDATE / ACTIVE / 新股预热 / NULL)
  *   - Four transition counts (BASE→CANDIDATE / CANDIDATE→ACTIVE / ACTIVE→BASE / ACTIVE→ACTIVE)
- *   - Data freshness indicator (last calculation time, production run status, asset count)
+ *   - Data freshness indicator bound to the selected date's production run
  */
 
-import { Clock, TrendingUp, TrendingDown, Minus, RefreshCw } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import {
   EmptyState,
   ErrorState,
@@ -20,12 +20,12 @@ import {
   StatusBadge,
 } from '@/shared/ui';
 import { formatCalculationTime } from '../lib/systemBFormat';
-import type { ProductionRunDto, SystemBSummaryDto } from '../types/systemB';
+import { isSystemBSummaryNotReadyError } from '../api/systemBApi';
+import type { SystemBSummaryDto } from '../types/systemB';
 
 interface SystemBStatusPanelProps {
   date: string;
   summary: SystemBSummaryDto | undefined;
-  productionRun: ProductionRunDto | null | undefined;
   isLoading: boolean;
   error: unknown;
   onRetry: () => void;
@@ -34,23 +34,22 @@ interface SystemBStatusPanelProps {
 export function SystemBStatusPanel({
   date,
   summary,
-  productionRun,
   isLoading,
   error,
   onRetry,
 }: SystemBStatusPanelProps) {
-  const totalAssets =
-    summary && (summary.base_count + summary.candidate_count + summary.active_count + summary.null_state_count) > 0
-      ? summary.base_count + summary.candidate_count + summary.active_count + summary.null_state_count
-      : 0;
+  // The backend summary SQL counts NEW_LISTING_WARMUP separately; its
+  // trend_state is already represented by one of the four state buckets (or
+  // NULL), so it must not be added to this denominator a second time.
+  const totalAssets = summary
+    ? summary.base_count + summary.candidate_count + summary.active_count + summary.null_state_count
+    : 0;
 
   const pct = (count: number): string => {
     if (totalAssets === 0) return '—';
     return `${((count / totalAssets) * 100).toFixed(1)}%`;
   };
-
-  const freshnessTone: 'success' | 'warning' | 'danger' =
-    productionRun?.status === 'SUCCEEDED' ? 'success' : productionRun?.status ? 'warning' : 'danger';
+  const summaryReady = Boolean(summary?.production_run_id?.trim());
 
   return (
     <Panel>
@@ -59,10 +58,10 @@ export function SystemBStatusPanel({
         meta={`${date} · 全市场趋势状态分布`}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {productionRun ? (
-              <StatusBadge tone={freshnessTone}>
+            {summaryReady ? (
+              <StatusBadge tone="success">
                 <Clock size={11} style={{ marginRight: 3 }} />
-                {productionRun.status}
+                已完成
               </StatusBadge>
             ) : null}
             {summary?.calculation_completed_at ? (
@@ -76,10 +75,12 @@ export function SystemBStatusPanel({
       <PanelBody>
         {isLoading ? (
           <LoadingState label="正在加载 System B 状态摘要…" />
+        ) : isSystemBSummaryNotReadyError(error) ? (
+          <EmptyState title="该交易日 System B 尚未完成计算" description="当前交易日还没有可用的生产结果。" />
         ) : error ? (
           <ErrorState error={error} onRetry={onRetry} title="状态摘要加载失败" />
-        ) : !summary ? (
-          <EmptyState title="该交易日没有 System B 状态数据" description="请确认 production run 已完成，或切换交易日。" />
+        ) : !summary || !summaryReady ? (
+          <EmptyState title="该交易日 System B 尚未完成计算" description="当前交易日还没有可用的生产结果。" />
         ) : (
           <div className="stack">
             {/* P0-1: State distribution cards */}
@@ -145,31 +146,14 @@ export function SystemBStatusPanel({
             <div className="fact-row">
               <span>数据新鲜度</span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-                {productionRun ? (
-                  <>
-                    <span>
-                      <strong>状态</strong>
-                      <StatusBadge tone={freshnessTone}>{productionRun.status}</StatusBadge>
-                    </span>
-                    {productionRun.asset_count != null ? (
-                      <span>
-                        <strong>覆盖</strong>
-                        <StatusBadge tone="info">{productionRun.asset_count.toLocaleString('zh-CN')} 只</StatusBadge>
-                      </span>
-                    ) : null}
-                    {productionRun.completed_at ? (
-                      <span>
-                        <strong>完成时间</strong>
-                        <span style={{ fontSize: '12px' }}>{formatCalculationTime(productionRun.completed_at)}</span>
-                      </span>
-                    ) : null}
-                  </>
-                ) : (
-                  <span style={{ color: 'var(--muted)', fontSize: '12px' }}>
-                    <RefreshCw size={12} style={{ marginRight: 4 }} />
-                    等待 production run 数据…
-                  </span>
-                )}
+                <span>
+                  <strong>生产批次</strong>
+                  <code>{summary.production_run_id}</code>
+                </span>
+                <span>
+                  <strong>完成时间</strong>
+                  <span style={{ fontSize: '12px' }}>{formatCalculationTime(summary.calculation_completed_at)}</span>
+                </span>
               </div>
             </div>
           </div>

@@ -93,10 +93,21 @@ export function poolTone(poolType: string): 'special' | 'info' | 'warning' {
   }
 }
 
-/** Format a datetime string for display (e.g., "2026-07-27T18:30:22" → "07/27 18:30"). */
+/**
+ * Format a backend datetime for display in the product timezone.
+ *
+ * New responses include Z or an explicit offset.  During the short migration
+ * window, the old offset-less datetime contract is explicitly UTC-naive, so
+ * append Z before parsing instead of letting the browser's local timezone win.
+ */
 export function formatCalculationTime(value: string | null | undefined): string {
   if (!value) return '—';
-  const date = new Date(value);
+  const input = value.trim();
+  if (!input) return '—';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+
+  const utcNaiveDateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/;
+  const date = new Date(utcNaiveDateTime.test(input) ? `${input}Z` : input);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat('zh-CN', {
     timeZone: 'Asia/Shanghai',

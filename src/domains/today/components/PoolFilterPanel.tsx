@@ -24,6 +24,7 @@ import {
   StatusBadge,
 } from '@/shared/ui';
 import { poolLabel, poolShortLabel, poolTone } from '../lib/systemBFormat';
+import { isPoolSnapshotNotReadyError } from '../api/systemBApi';
 import { POOL_TYPES } from '../types/systemB';
 import type { PoolSnapshotResponse } from '../types/systemB';
 
@@ -64,6 +65,8 @@ export function PoolFilterPanel({
       <PanelBody>
         {isLoading ? (
           <LoadingState label="正在加载三池快照…" />
+        ) : isPoolSnapshotNotReadyError(error) ? (
+          <EmptyState title="该交易日三池尚未完成计算" description="当前交易日还没有完整的三池快照。" />
         ) : error ? (
           <ErrorState error={error} onRetry={onRetry} title="三池快照加载失败" />
         ) : !snapshot ? (
