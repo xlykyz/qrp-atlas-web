@@ -1,15 +1,20 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, RefreshCw } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, StatusBadge } from '@/shared/ui';
 import { todayKeys, useTodayWorkspace, useTradingDates } from '../hooks/queries';
+import { useActiveEpisodes, useLatestProductionRun, usePoolSnapshot, useSystemBSummary, systemBKeys } from '../hooks/useSystemB';
+import { ActiveListPanel } from '../components/ActiveListPanel';
 import { ExtremeMovesPanel } from '../components/ExtremeMovesPanel';
 import { FreshnessPanel } from '../components/FreshnessPanel';
 import { IndexTapePanel } from '../components/IndexTapePanel';
 import { MarketOverviewPanel } from '../components/MarketOverviewPanel';
+import { PoolFilterPanel } from '../components/PoolFilterPanel';
 import { ResearchFeedPanel } from '../components/ResearchFeedPanel';
+import { SystemBStatusPanel } from '../components/SystemBStatusPanel';
 import { WorkQueuePanel } from '../components/WorkQueuePanel';
+import type { PoolMemberDto } from '../types/systemB';
 
 export function TodayPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,6 +23,24 @@ export function TodayPage() {
   const selectedDate = requestedDate || dates.data?.dates[0] || null;
   const workspace = useTodayWorkspace(selectedDate);
   const queryClient = useQueryClient();
+
+  // ── System B monitoring data ──────────────────────────────────
+  const systemBSummary = useSystemBSummary(selectedDate);
+  const systemBProductionRun = useLatestProductionRun();
+  const activeEpisodes = useActiveEpisodes(selectedDate);
+  const poolSnapshot = usePoolSnapshot(selectedDate);
+  const [selectedPool, setSelectedPool] = useState<string | null>(null);
+
+  // Flatten pool members for cross-filter and badge display in ActiveListPanel.
+  const poolMembers: PoolMemberDto[] = useMemo(() => {
+    if (!poolSnapshot.data) return [];
+    return poolSnapshot.data.pools.flatMap((p) => p.members);
+  }, [poolSnapshot.data]);
+
+  // Reset pool filter when date changes (pool membership is date-specific).
+  useEffect(() => {
+    setSelectedPool(null);
+  }, [selectedDate]);
 
   useEffect(() => {
     if (!requestedDate && dates.data?.dates[0]) {
@@ -48,7 +71,10 @@ export function TodayPage() {
     next.set('date', value);
     setSearchParams(next);
   };
-  const refresh = () => void queryClient.invalidateQueries({ queryKey: todayKeys.all });
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: todayKeys.all });
+    void queryClient.invalidateQueries({ queryKey: systemBKeys.all });
+  };
 
   return <div className="stack today-page">
     <PageHeader eyebrow="每日启动" title="今日工作台" description="先确认市场事实、数据新鲜度与待处理任务，再带着交易日上下文进入复盘和研究。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>研究日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
@@ -58,6 +84,31 @@ export function TodayPage() {
       <Link className="button button--primary button--md" to={`/review/market?date=${selectedDate}`}>开始复盘</Link>
     </>} />
     <div className="today-context-line"><strong>{selectedDate === dates.data?.dates[0] ? '最新有效交易日' : '历史研究日'}</strong><span>页面中的市场、极端状态与下钻链接均固定到该日期。</span><span className="toolbar__spacer">URL 已保留 <code>?date={selectedDate}</code></span></div>
+    {/* ── System B 状态监测（首屏） ────────────────────────────── */}
+    <SystemBStatusPanel
+      date={selectedDate}
+      summary={systemBSummary.data}
+      productionRun={systemBProductionRun.data}
+      isLoading={systemBSummary.isLoading || systemBProductionRun.isLoading}
+      error={systemBSummary.error ?? systemBProductionRun.error}
+      onRetry={() => { void systemBSummary.refetch(); void systemBProductionRun.refetch(); }}
+    />
+    <PoolFilterPanel
+      snapshot={poolSnapshot.data}
+      selectedPool={selectedPool}
+      onPoolSelect={setSelectedPool}
+      isLoading={poolSnapshot.isLoading}
+      error={poolSnapshot.error}
+      onRetry={() => void poolSnapshot.refetch()}
+    />
+    <ActiveListPanel
+      episodes={activeEpisodes.data}
+      poolMembers={poolMembers}
+      selectedPool={selectedPool}
+      isLoading={activeEpisodes.isLoading}
+      error={activeEpisodes.error}
+      onRetry={() => void activeEpisodes.refetch()}
+    />
     <MarketOverviewPanel date={selectedDate} rows={workspace.daily.data} phase={phase} limitUpCount={workspace.limitUps.data?.length} limitDownCount={workspace.limitDowns.data?.length} isLoading={workspace.daily.isLoading || workspace.limitUps.isLoading || workspace.limitDowns.isLoading || workspace.phase.isLoading} error={marketError} onRetry={() => { void workspace.daily.refetch(); void workspace.limitUps.refetch(); void workspace.limitDowns.refetch(); void workspace.phase.refetch(); }} />
     <div className="grid grid--main-aside today-primary-grid">
       <div className="stack">
