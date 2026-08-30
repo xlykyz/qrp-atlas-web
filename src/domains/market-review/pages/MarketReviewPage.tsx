@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from 'react';
-import { CalendarDays, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, StatusBadge } from '@/shared/ui';
+import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, StatusBadge, TradingDatePicker } from '@/shared/ui';
 import { LimitPoolPanel } from '../components/LimitPoolPanel';
 import { MarketPulsePanel } from '../components/MarketPulsePanel';
 import { MarketStructurePanel } from '../components/MarketStructurePanel';
@@ -43,7 +43,7 @@ export function MarketReviewPage() {
   return <div className="stack market-review-page">
     <PageHeader eyebrow="盘后工作流" title="市场复盘" description="在固定交易日中核对市场广度、指数、强弱结构与极端池，并保存明确标识的人工阶段判断。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>交易日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
     {dates.data?.rejectedCalendarDates.length ? <ContractDriftState title="交易日契约已校正" detail={<>后端日历返回了没有市场快照覆盖的日期 <code>{dates.data.rejectedCalendarDates.join('、')}</code>；页面已按 <code>daily_market_snapshot</code> 水位 {dates.data.marketWatermark ?? '未知'} 排除，并保留此告警。</>} /> : null}
-      <label className="date-control"><CalendarDays size={14} /><span>交易日</span><select className="select" value={selectedDate} onChange={(event) => updateFilter('date', event.target.value)} aria-label="选择复盘交易日">{(dates.data?.dates ?? [selectedDate]).map((date) => <option key={date} value={date}>{date}</option>)}</select></label>
+      <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} onChange={(value) => updateFilter('date', value)} aria-label="选择复盘交易日" />
       <Button onClick={refresh}><RefreshCw size={14} />刷新</Button>
       <Link className="button button--primary button--md" to={`/research/stocks?date=${selectedDate}`}>进入个股研究</Link>
     </>} />

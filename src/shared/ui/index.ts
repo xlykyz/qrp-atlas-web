@@ -5,3 +5,4 @@ export { LoadingState, EmptyState, ErrorState, CapabilityUnavailable, StaleState
 export { Metric, MetricStrip } from './Metric';
 export { Field, Input, Select } from './Field';
 export { PageHeader } from './PageHeader';
+export { TradingDatePicker } from './TradingDatePicker';

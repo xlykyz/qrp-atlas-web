@@ -187,7 +187,7 @@ pre.code-block { max-width: 100%; overflow: auto; margin: 0; padding: 12px; bord
 /* Stage three: today workspace */
 .today-page { gap: 14px; }
 .date-control { height: 32px; display: flex; align-items: center; gap: 7px; padding-left: 9px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--surface); color: var(--muted); white-space: nowrap; }
-.date-control .select { width: 132px; min-height: 30px; border: 0; border-left: 1px solid var(--line); border-radius: 0 4px 4px 0; box-shadow: none; }
+.date-control .select, .date-control input[type="date"], .date-control .date-input { width: 132px; min-height: 30px; border: 0; border-left: 1px solid var(--line); border-radius: 0 4px 4px 0; box-shadow: none; background: #fff; color: var(--text); padding: 4px 8px; font-family: inherit; font-size: 13px; outline: none; } .date-control input[type="date"]:focus, .date-control .date-input:focus { border-color: var(--accent); } .date-control input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.7; } .date-control input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .today-context-line { min-height: 36px; display: flex; align-items: center; gap: 10px; padding: 7px 11px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-subtle); color: var(--muted); font-size: 12px; }
 .today-context-line strong { color: var(--text); }
 .breadth-summary { display: grid; gap: 7px; padding: 10px 0 2px; }
@@ -251,7 +251,7 @@ pre.code-block { max-width: 100%; overflow: auto; margin: 0; padding: 12px; bord
 .freshness-list > div > span:nth-child(2) { align-items: flex-end; font-variant-numeric: tabular-nums; }
 @media (max-width: 1350px) { .index-tape { grid-template-columns: repeat(2, minmax(0, 1fr)); } .index-tape__item:nth-child(2n) { border-right: 0; } .index-tape__item:nth-child(-n+2) { border-bottom: 1px solid var(--line); } }
 @media (max-width: 900px) { .extreme-columns { grid-template-columns: 1fr; } .extreme-columns > section + section { border-left: 0; border-top: 1px solid var(--line); } .today-context-line { align-items: flex-start; flex-direction: column; } .today-context-line .toolbar__spacer { margin-left: 0; } }
-@media (max-width: 640px) { .index-tape, .queue-shortcuts { grid-template-columns: 1fr; } .index-tape__item { border-right: 0; border-bottom: 1px solid var(--line); } .fact-row { grid-template-columns: 1fr; } .date-control { width: 100%; } .date-control .select { flex: 1; width: auto; } .evidence-feed > a { grid-template-columns: 28px minmax(0, 1fr); } .evidence-feed__date { grid-column: 2; align-items: flex-start; flex-direction: row; } }
+@media (max-width: 640px) { .index-tape, .queue-shortcuts { grid-template-columns: 1fr; } .index-tape__item { border-right: 0; border-bottom: 1px solid var(--line); } .fact-row { grid-template-columns: 1fr; } .date-control { width: 100%; } .date-control .select, .date-control .date-input, .date-control input[type="date"] { flex: 1; width: auto; } .evidence-feed > a { grid-template-columns: 28px minmax(0, 1fr); } .evidence-feed__date { grid-column: 2; align-items: flex-start; flex-direction: row; } }
 
 /* Stage three: market review */
 .market-review-page { gap: 14px; }

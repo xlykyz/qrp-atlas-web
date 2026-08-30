@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -145,7 +145,7 @@ describe('TodayPage System B integration', () => {
     await user.click(screen.getByRole('button', { name: /高度/ }));
     expect(screen.getByRole('button', { name: '高度0' })).toHaveClass('button--primary');
 
-    await user.selectOptions(screen.getByRole('combobox', { name: '选择交易日' }), '2026-08-02');
+    fireEvent.change(screen.getByLabelText('选择交易日'), { target: { value: '2026-08-02' } });
     expect(await screen.findByText('run-2026-08-02')).toBeVisible();
     await waitFor(() => expect(screen.getByRole('button', { name: '全部' })).toHaveClass('button--primary'));
 

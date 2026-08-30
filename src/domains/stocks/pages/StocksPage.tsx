@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { CalendarDays, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, Panel, PanelBody, PanelHeader, StatusBadge } from '@/shared/ui';
+import { Button, ContractDriftState, ErrorState, LoadingState, PageHeader, Panel, PanelBody, PanelHeader, StatusBadge, TradingDatePicker } from '@/shared/ui';
 import { StockListTable } from '../components/StockListTable';
 import { useStockDates, useStockList } from '../hooks/queries';
 
@@ -41,7 +41,7 @@ export function StocksPage() {
       <label className="market-search stock-search"><Search size={14} /><input value={keyword} onChange={(event) => update('query', event.target.value)} placeholder="输入代码或名称" aria-label="搜索股票" /></label>
       <select className="select" value={exchange} onChange={(event) => update('exchange', event.target.value)} aria-label="筛选交易所"><option value="">全部交易所</option><option value="SH">上海</option><option value="SZ">深圳</option><option value="BJ">北京</option></select>
       <select className="select" value={active} onChange={(event) => update('active', event.target.value)} aria-label="筛选在市状态"><option value="true">仅在市</option><option value="false">仅非在市</option><option value="all">全部状态</option></select>
-      <label className="date-control"><CalendarDays size={14} /><span>研究日</span><select className="select" value={selectedDate} onChange={(event) => update('date', event.target.value)} aria-label="选择研究交易日">{(dates.data?.dates ?? [selectedDate]).map((date) => <option key={date} value={date}>{date}</option>)}</select></label>
+      <TradingDatePicker label="研究日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} onChange={(value) => update('date', value)} aria-label="选择研究交易日" />
     </div></PanelBody></Panel>
     <Panel><PanelHeader title="股票主数据" meta={stocks.isFetching ? '更新中...' : `本页返回 ${stocks.data?.length ?? 0} 个对象`} actions={<StatusBadge tone={stocks.isError ? 'danger' : 'success'}>{stocks.isError ? '查询失败' : '后端筛选'}</StatusBadge>} /><PanelBody className="panel__body--flush"><StockListTable rows={stocks.data} date={selectedDate} isLoading={stocks.isLoading} error={stocks.error} onRetry={() => void stocks.refetch()} /></PanelBody></Panel>
     <div className="stock-pagination"><Button disabled={page === 0 || stocks.isFetching} onClick={() => update('page', String(page - 1))}><ChevronLeft size={14} />上一页</Button><span>第 {page + 1} 页 · 每页最多 {PAGE_SIZE} 条</span><Button disabled={(stocks.data?.length ?? 0) < PAGE_SIZE || stocks.isFetching} onClick={() => update('page', String(page + 1))}>下一页<ChevronRight size={14} /></Button></div>
