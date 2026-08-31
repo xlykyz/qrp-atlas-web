@@ -77,11 +77,11 @@ export function TodayPage() {
 
   return <div className="stack today-page">
     <PageHeader eyebrow="每日启动" title="今日工作台" description="先确认市场事实、数据新鲜度与待处理任务，再带着交易日上下文进入复盘和研究。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>研究日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
-    {dates.data?.rejectedCalendarDates.length ? <ContractDriftState title="交易日契约已校正" detail={<>后端日历返回了没有市场快照覆盖的日期 <code>{dates.data.rejectedCalendarDates.join('、')}</code>；页面已按 <code>daily_market_snapshot</code> 水位 {dates.data.marketWatermark ?? '未知'} 排除，并保留此告警。</>} /> : null}
       <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} onChange={setDate} aria-label="选择交易日" />
       <Button onClick={refresh}><RefreshCw size={14} />刷新</Button>
       <Link className="button button--primary button--md" to={`/review/market?date=${selectedDate}`}>开始复盘</Link>
     </>} />
+    {dates.data?.rejectedCalendarDates.length ? <ContractDriftState title="交易日契约已校正" detail={<>后端日历返回了没有市场快照覆盖的日期 <code>{dates.data.rejectedCalendarDates.join('、')}</code>；页面已按 <code>daily_market_snapshot</code> 水位 {dates.data.marketWatermark ?? '未知'} 排除，并保留此告警。</>} /> : null}
     <div className="today-context-line"><strong>{selectedDate === dates.data?.dates[0] ? '最新有效交易日' : '历史研究日'}</strong><span>页面中的市场、极端状态与下钻链接均固定到该日期。</span><span className="toolbar__spacer">URL 已保留 <code>?date={selectedDate}</code></span></div>
     {/* ── System B 状态监测（首屏） ────────────────────────────── */}
     <SystemBStatusPanel

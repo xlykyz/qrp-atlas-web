@@ -42,11 +42,11 @@ export function MarketReviewPage() {
 
   return <div className="stack market-review-page">
     <PageHeader eyebrow="盘后工作流" title="市场复盘" description="在固定交易日中核对市场广度、指数、强弱结构与极端池，并保存明确标识的人工阶段判断。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>交易日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
-    {dates.data?.rejectedCalendarDates.length ? <ContractDriftState title="交易日契约已校正" detail={<>后端日历返回了没有市场快照覆盖的日期 <code>{dates.data.rejectedCalendarDates.join('、')}</code>；页面已按 <code>daily_market_snapshot</code> 水位 {dates.data.marketWatermark ?? '未知'} 排除，并保留此告警。</>} /> : null}
       <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} onChange={(value) => updateFilter('date', value)} aria-label="选择复盘交易日" />
       <Button onClick={refresh}><RefreshCw size={14} />刷新</Button>
       <Link className="button button--primary button--md" to={`/research/stocks?date=${selectedDate}`}>进入个股研究</Link>
     </>} />
+    {dates.data?.rejectedCalendarDates.length ? <ContractDriftState title="交易日契约已校正" detail={<>后端日历返回了没有市场快照覆盖的日期 <code>{dates.data.rejectedCalendarDates.join('、')}</code>；页面已按 <code>daily_market_snapshot</code> 水位 {dates.data.marketWatermark ?? '未知'} 排除，并保留此告警。</>} /> : null}
     <div className="today-context-line"><strong>{selectedDate === dates.data?.dates[0] ? '最新有效交易日' : '历史复盘'}</strong><span>市场事实、人工判断与所有个股下钻均锁定到 {selectedDate}。</span><span className="toolbar__spacer">筛选条件由 URL 保存</span></div>
     <MarketPulsePanel date={selectedDate} daily={review.daily.data} indexes={review.indexes.data} limitUpCount={review.limitUps.data?.length} limitDownCount={review.limitDowns.data?.length} isLoading={review.daily.isLoading || review.indexes.isLoading || review.limitUps.isLoading || review.limitDowns.isLoading} error={marketError} onRetry={() => { void review.daily.refetch(); void review.indexes.refetch(); void review.limitUps.refetch(); void review.limitDowns.refetch(); }} />
     <div className="grid grid--main-aside market-review-workspace"><div className="stack">
