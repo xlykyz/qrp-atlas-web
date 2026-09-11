@@ -77,7 +77,7 @@ export function TodayPage() {
 
   return <div className="stack today-page">
     <PageHeader eyebrow="每日启动" title="今日工作台" description="先确认市场事实、数据新鲜度与待处理任务，再带着交易日上下文进入复盘和研究。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>研究日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
-      <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} onChange={setDate} aria-label="选择交易日" />
+      <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} availableDates={dates.data?.dates} onChange={setDate} onClear={() => setSearchParams((current) => { const next = new URLSearchParams(current); next.delete('date'); return next; }, { replace: true })} aria-label="选择交易日" />
       <Button onClick={refresh}><RefreshCw size={14} />刷新</Button>
       <Link className="button button--primary button--md" to={`/review/market?date=${selectedDate}`}>开始复盘</Link>
     </>} />

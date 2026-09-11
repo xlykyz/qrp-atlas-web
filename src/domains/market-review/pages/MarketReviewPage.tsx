@@ -42,7 +42,7 @@ export function MarketReviewPage() {
 
   return <div className="stack market-review-page">
     <PageHeader eyebrow="盘后工作流" title="市场复盘" description="在固定交易日中核对市场广度、指数、强弱结构与极端池，并保存明确标识的人工阶段判断。" meta={<><StatusBadge tone="success">真实 API</StatusBadge><span>交易日 {selectedDate}</span><span>最后刷新 {lastUpdated ?? '尚未完成'}</span></>} actions={<>
-      <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} onChange={(value) => updateFilter('date', value)} aria-label="选择复盘交易日" />
+      <TradingDatePicker label="交易日" value={selectedDate} max={dates.data?.marketWatermark ?? dates.data?.dates[0] ?? undefined} availableDates={dates.data?.dates} onChange={(value) => updateFilter('date', value)} onClear={() => updateFilter('date', '')} aria-label="选择复盘交易日" />
       <Button onClick={refresh}><RefreshCw size={14} />刷新</Button>
       <Link className="button button--primary button--md" to={`/research/stocks?date=${selectedDate}`}>进入个股研究</Link>
     </>} />
