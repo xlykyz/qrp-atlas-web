@@ -145,7 +145,13 @@ describe('TodayPage System B integration', () => {
     await user.click(screen.getByRole('button', { name: /高度/ }));
     expect(screen.getByRole('button', { name: '高度0' })).toHaveClass('button--primary');
 
-    fireEvent.change(screen.getByLabelText('选择交易日'), { target: { value: '2026-08-02' } });
+    fireEvent.click(screen.getByRole('button', { name: '选择交易日' }));
+    // 2026-08-02 在交易日列表中可选；同名数字的补位月按钮为置灰不可点
+    const targetDay = screen
+      .getAllByRole('button', { name: '2' })
+      .find((el) => !(el as HTMLButtonElement).disabled);
+    expect(targetDay).toBeDefined();
+    fireEvent.click(targetDay as HTMLButtonElement);
     expect(await screen.findByText('run-2026-08-02')).toBeVisible();
     await waitFor(() => expect(screen.getByRole('button', { name: '全部' })).toHaveClass('button--primary'));
 
