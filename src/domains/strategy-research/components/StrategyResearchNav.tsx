@@ -1,1 +1,14 @@
-import{NavLink}from'react-router-dom';export function StrategyResearchNav(){return <nav className="tabs" aria-label="策略研究导航"><NavLink end to="/strategies">内置策略</NavLink><NavLink to="/strategies/indicators">指标</NavLink><NavLink to="/strategies/factors">因子</NavLink><NavLink to="/strategies/declarative">声明式策略</NavLink></nav>}
+import { NavLink } from 'react-router-dom';
+
+export function StrategyResearchNav() {
+  return (
+    <nav className="tabs" aria-label="策略研究导航">
+      <NavLink end to="/strategies">内置策略</NavLink>
+      <NavLink to="/strategies/indicators">指标</NavLink>
+      <NavLink to="/strategies/factors">因子</NavLink>
+      <NavLink to="/strategies/declarative">声明式策略</NavLink>
+      <NavLink to="/strategies/sandbox">策略沙盒</NavLink>
+    </nav>
+  );
+}
+

@@ -17,6 +17,7 @@ const FactorsPage = lazy(() => import('@/domains/strategy-research/pages/Factors
 const DeclarativeStrategiesPage = lazy(() => import('@/domains/strategy-research/pages/DeclarativeStrategiesPage').then((module) => ({ default: module.DeclarativeStrategiesPage })));
 const DeclarativeEditorPage = lazy(() => import('@/domains/strategy-research/pages/DeclarativeEditorPage').then((module) => ({ default: module.DeclarativeEditorPage })));
 const DeclarativeDetailPage = lazy(() => import('@/domains/strategy-research/pages/DeclarativeDetailPage').then((module) => ({ default: module.DeclarativeDetailPage })));
+const StrategySandboxPage = lazy(() => import('@/domains/strategy-research/pages/StrategySandboxPage').then((module) => ({ default: module.StrategySandboxPage })));
 const OperationsPage = lazy(() => import('@/domains/operations/pages/OperationsPage').then((module) => ({ default: module.OperationsPage })));
 const StrategiesPage = lazy(() => import('@/domains/backtests/pages/StrategiesPage').then((module) => ({ default: module.StrategiesPage })));
 const StrategyDetailPage = lazy(() => import('@/domains/backtests/pages/StrategyDetailPage').then((module) => ({ default: module.StrategyDetailPage })));
@@ -48,6 +49,7 @@ export function AppRouter() {
     <Route path="strategies/declarative" element={<DeclarativeStrategiesPage />} />
     <Route path="strategies/declarative/new" element={<DeclarativeEditorPage />} />
     <Route path="strategies/declarative/:code/:version" element={<DeclarativeDetailPage />} />
+    <Route path="strategies/sandbox" element={<StrategySandboxPage />} />
     <Route path="strategies/:code" element={<StrategyDetailPage />} />
     <Route path="backtests" element={<BacktestsHomePage />} />
     <Route path="backtests/new" element={<NewBacktestPage />} />
