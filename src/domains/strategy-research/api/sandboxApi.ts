@@ -1,6 +1,6 @@
 import { apiRequest } from '@/shared/api/client';
 import type { BacktestSummary, EquityPoint } from '@/domains/backtests/types/models';
-import type { SandboxRunRequest, SandboxRunResponse } from '../types/sandbox';
+import type { SandboxBenchmarkRequest, SandboxBenchmarkResponse, SandboxRunRequest, SandboxRunResponse } from '../types/sandbox';
 
 /**
  * 客户端本地轻量模拟回退计算器。
@@ -108,7 +108,7 @@ export function simulateSandboxRun(req: SandboxRunRequest): SandboxRunResponse {
     slippage_cost: Math.round(initialCash * 0.0005),
     total_cost: Math.round(initialCash * 0.0027),
     final_equity: Math.round(finalEquity * 100) / 100,
-    benchmark_id: req.benchmark_id || '000985.XSHG',
+    benchmark_id: req.benchmark_id || '000001.SH',
     benchmark_total_return_pct: 6.8,
     portfolio_total_return_pct: Math.round(totalReturnPct * 100) / 100,
     excess_percentage_point_pct: Math.round((totalReturnPct - 6.8) * 100) / 100,
@@ -127,6 +127,7 @@ export function simulateSandboxRun(req: SandboxRunRequest): SandboxRunResponse {
     logs,
     error_message: null,
     duration_ms: Math.floor(180 + Math.random() * 240),
+    is_simulated: true,
   };
 }
 
@@ -153,5 +154,21 @@ export const sandboxApi = {
       await new Promise((resolve) => setTimeout(resolve, 350));
       return simulateSandboxRun(req);
     }
+  },
+
+  /**
+   * 切换对比基准时的轻量重算。
+   * 基准只影响绩效后处理，不参与策略执行，因此只传净值序列即可，
+   * 无需重跑策略（后端毫秒级返回）。此接口不做本地模拟回退——失败必须如实暴露。
+   */
+  async recomputeBenchmark(
+    equityPoints: EquityPoint[],
+    benchmarkId: string,
+  ): Promise<SandboxBenchmarkResponse> {
+    return apiRequest<SandboxBenchmarkResponse>('/api/custom-strategies/sandbox-benchmark', {
+      method: 'POST',
+      body: { equity_points: equityPoints, benchmark_id: benchmarkId } satisfies SandboxBenchmarkRequest,
+      timeoutMs: 30_000,
+    });
   },
 };

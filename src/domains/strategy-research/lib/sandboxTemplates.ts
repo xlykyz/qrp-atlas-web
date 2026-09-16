@@ -72,7 +72,7 @@ import pandas as pd
 
 FAST_WINDOW = 5
 SLOW_WINDOW = 20
-ASSET_POOL = ["000300.SH", "000905.SH", "000852.SH"]
+ASSET_POOL = ["000001.SH", "399001.SZ", "399006.SZ"]
 
 def initialize(context):
     context.pool = ASSET_POOL
@@ -121,9 +121,9 @@ def initialize(context):
 
 def handle_bar(context, market_data):
     date = context.current_date
-    # 始终满仓配置中证全指
+    # 始终满仓配置上证综指
     print(f"[{date}] 维持满仓基准持仓")
-    return {"000985.XSHG": 1.0}
+    return {"000001.SH": 1.0}
 `,
   },
 ];

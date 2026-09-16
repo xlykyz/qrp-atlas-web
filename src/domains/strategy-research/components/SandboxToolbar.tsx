@@ -86,10 +86,10 @@ export function SandboxToolbar({
             onChange={(e) => onBenchmarkChange(e.target.value)}
             style={{ height: '32px', fontSize: '12px', minWidth: '130px' }}
           >
-            <option value="000985.XSHG">000985 中证全指</option>
-            <option value="000300.SH">000300 沪深300</option>
-            <option value="000905.SH">000905 中证500</option>
-            <option value="000852.SH">000852 中证1000</option>
+            <option value="000001.SH">000001 上证综指</option>
+            <option value="399001.SZ">399001 深证成指</option>
+            <option value="399006.SZ">399006 创业板指</option>
+            <option value="000688.SH">000688 科创50</option>
           </select>
         </div>
       </div>

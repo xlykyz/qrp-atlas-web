@@ -1,15 +1,16 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { PageHeader, Panel, PanelBody, PanelHeader, StatusBadge } from '@/shared/ui';
 import { useTradingDates } from '@/domains/today/hooks/queries';
-import { EquityChart } from '@/shared/charts/EquityChart';
+import { EquityChart, type BenchmarkCurvePoint } from '@/shared/charts/EquityChart';
 import { RunMetrics } from '@/domains/backtests/components/RunMetrics';
 import { StrategyResearchNav } from '../components/StrategyResearchNav';
 import { SandboxEditor } from '../components/SandboxEditor';
 import { SandboxToolbar } from '../components/SandboxToolbar';
 import { SandboxConsole } from '../components/SandboxConsole';
+import { SandboxBenchmarkPanel } from '../components/SandboxBenchmarkPanel';
 import { SANDBOX_TEMPLATES } from '../lib/sandboxTemplates';
 import { sandboxApi, simulateSandboxRun } from '../api/sandboxApi';
-import type { SandboxRunResponse } from '../types/sandbox';
+import type { SandboxBenchmarkSeriesPoint, SandboxRunResponse } from '../types/sandbox';
 
 export function StrategySandboxPage() {
   const dates = useTradingDates();
@@ -31,7 +32,7 @@ export function StrategySandboxPage() {
   // Code & configuration state
   const [code, setCode] = useState<string>(SANDBOX_TEMPLATES[0]?.code ?? '');
   const [initialCash, setInitialCash] = useState<number>(1000000);
-  const [benchmarkId, setBenchmarkId] = useState<string>('000985.XSHG');
+  const [benchmarkId, setBenchmarkId] = useState<string>('000001.SH');
 
   // Execution state: initialized with initial simulation result so page is immediately alive
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -41,9 +42,11 @@ export function StrategySandboxPage() {
       start_date: '2025-01-02',
       end_date: '2025-06-30',
       initial_cash: 1000000,
-      benchmark_id: '000985.XSHG',
+      benchmark_id: '000001.SH',
     })
   );
+  // 基准对齐序列（由后端提供）。重跑后失效需清空，切换基准时重新拉取。
+  const [benchmarkSeries, setBenchmarkSeries] = useState<SandboxBenchmarkSeriesPoint[]>([]);
 
   // Execute sandbox run
   const handleRun = useCallback(() => {
@@ -60,6 +63,8 @@ export function StrategySandboxPage() {
       })
       .then((result) => {
         setRunResult(result);
+        // 首次运行即带上基准序列，无需先切换基准才能画出对比线。
+        setBenchmarkSeries(result.series ?? []);
       })
       .catch((err: unknown) => {
         setRunResult({
@@ -75,6 +80,59 @@ export function StrategySandboxPage() {
         setIsPending(false);
       });
   }, [code, startDate, endDate, initialCash, benchmarkId, isPending]);
+
+  // 切换对比基准只重算绩效后处理，不重跑策略：基准不参与逐日决策与结算，
+  // 因此无需重新执行用户代码（后端毫秒级返回）。模拟回退结果不参与重算。
+  const handleBenchmarkChange = useCallback(
+    (next: string) => {
+      setBenchmarkId(next);
+      if (runResult.is_simulated || runResult.equity_points.length === 0) return;
+      void sandboxApi
+        .recomputeBenchmark(runResult.equity_points, next)
+        .then((benchmark) => {
+          setBenchmarkSeries(benchmark.series ?? []);
+          setRunResult((prev) =>
+            prev.summary
+              ? {
+                  ...prev,
+                  summary: {
+                    ...prev.summary,
+                    benchmark_id: benchmark.benchmark_id,
+                    benchmark_total_return_pct: benchmark.benchmark_total_return_pct,
+                    portfolio_total_return_pct: benchmark.portfolio_total_return_pct,
+                    excess_percentage_point_pct: benchmark.excess_percentage_point_pct,
+                    relative_return_pct: benchmark.relative_return_pct,
+                    excess_total_return_pct: benchmark.excess_total_return_pct,
+                    full_range_excess_available: benchmark.full_range_excess_available,
+                    benchmark_sharpe: benchmark.benchmark_sharpe,
+                    excess_sharpe: benchmark.excess_sharpe,
+                    daily_active_sharpe: benchmark.daily_active_sharpe,
+                  },
+                  logs: benchmark.logs.length ? [...prev.logs, ...benchmark.logs] : prev.logs,
+                }
+              : prev,
+          );
+        })
+        .catch((err: unknown) => {
+          setRunResult((prev) => ({
+            ...prev,
+            logs: [...prev.logs, `[基准重算失败] ${err instanceof Error ? err.message : String(err)}`],
+          }));
+        });
+    },
+    [runResult.equity_points, runResult.is_simulated],
+  );
+
+  // 基准曲线直接使用累计收益率（%），与组合收益率同轴，无需换算成金额。
+  const benchmarkCurve = useMemo<BenchmarkCurvePoint[]>(
+    () =>
+      benchmarkSeries.flatMap((point) =>
+        point.benchmark_cumulative_return_pct === null
+          ? []
+          : [{ date: point.date, return_pct: point.benchmark_cumulative_return_pct }],
+      ),
+    [benchmarkSeries],
+  );
 
   return (
     <div className="stack" style={{ gap: '16px' }}>
@@ -123,7 +181,7 @@ export function StrategySandboxPage() {
             initialCash={initialCash}
             onInitialCashChange={setInitialCash}
             benchmarkId={benchmarkId}
-            onBenchmarkChange={setBenchmarkId}
+            onBenchmarkChange={handleBenchmarkChange}
             onRun={handleRun}
             isPending={isPending}
             durationMs={runResult.duration_ms}
@@ -135,7 +193,7 @@ export function StrategySandboxPage() {
               title="实时绩效与收益曲线"
               meta={
                 runResult.summary
-                  ? `基准: ${benchmarkId} | 交易日: ${runResult.equity_points.length} 天`
+                  ? `基准: ${runResult.summary.benchmark_id ?? '—'} | 交易日: ${runResult.equity_points.length} 天`
                   : '准备就绪'
               }
             />
@@ -151,12 +209,15 @@ export function StrategySandboxPage() {
 
                 {runResult.equity_points.length > 0 ? (
                   <div style={{ background: '#fff', borderRadius: '4px', padding: '4px' }}>
-                    <EquityChart points={runResult.equity_points} />
+                    <EquityChart points={runResult.equity_points} benchmark={benchmarkCurve} />
                   </div>
                 ) : null}
               </div>
             </PanelBody>
           </Panel>
+
+          {/* Benchmark Comparison Panel */}
+          {runResult.summary ? <SandboxBenchmarkPanel summary={runResult.summary} /> : null}
 
           {/* Console & Diagnostics Panel */}
           <SandboxConsole
