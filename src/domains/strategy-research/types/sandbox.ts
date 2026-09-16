@@ -18,8 +18,6 @@ export interface SandboxRunResponse {
   duration_ms: number;
   /** 基准对齐序列（顶层，与 sandbox-benchmark 同口径）。后端尚未提供时为 undefined。 */
   series?: SandboxBenchmarkSeriesPoint[];
-  /** 是否为前端本地模拟回退结果（后端不可用时）。真实后端结果不携带此标记。 */
-  is_simulated?: boolean;
 }
 
 /** 基准重算请求：只做后处理，不重跑策略。 */

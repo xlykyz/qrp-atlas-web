@@ -9,7 +9,7 @@ import { SandboxToolbar } from '../components/SandboxToolbar';
 import { SandboxConsole } from '../components/SandboxConsole';
 import { SandboxBenchmarkPanel } from '../components/SandboxBenchmarkPanel';
 import { SANDBOX_TEMPLATES } from '../lib/sandboxTemplates';
-import { sandboxApi, simulateSandboxRun } from '../api/sandboxApi';
+import { sandboxApi } from '../api/sandboxApi';
 import type { SandboxBenchmarkSeriesPoint, SandboxRunResponse } from '../types/sandbox';
 
 export function StrategySandboxPage() {
@@ -34,17 +34,16 @@ export function StrategySandboxPage() {
   const [initialCash, setInitialCash] = useState<number>(1000000);
   const [benchmarkId, setBenchmarkId] = useState<string>('000001.SH');
 
-  // Execution state: initialized with initial simulation result so page is immediately alive
+  // 初始为空状态：不预置任何模拟数据，页面上的结果只能来自后端真实执行。
   const [isPending, setIsPending] = useState<boolean>(false);
-  const [runResult, setRunResult] = useState<SandboxRunResponse>(() =>
-    simulateSandboxRun({
-      code: SANDBOX_TEMPLATES[0]?.code ?? '',
-      start_date: '2025-01-02',
-      end_date: '2025-06-30',
-      initial_cash: 1000000,
-      benchmark_id: '000001.SH',
-    })
-  );
+  const [runResult, setRunResult] = useState<SandboxRunResponse>({
+    success: true,
+    summary: null,
+    equity_points: [],
+    logs: [],
+    error_message: null,
+    duration_ms: 0,
+  });
   // 基准对齐序列（由后端提供）。重跑后失效需清空，切换基准时重新拉取。
   const [benchmarkSeries, setBenchmarkSeries] = useState<SandboxBenchmarkSeriesPoint[]>([]);
 
@@ -86,7 +85,7 @@ export function StrategySandboxPage() {
   const handleBenchmarkChange = useCallback(
     (next: string) => {
       setBenchmarkId(next);
-      if (runResult.is_simulated || runResult.equity_points.length === 0) return;
+      if (runResult.equity_points.length === 0) return;
       void sandboxApi
         .recomputeBenchmark(runResult.equity_points, next)
         .then((benchmark) => {
@@ -120,7 +119,7 @@ export function StrategySandboxPage() {
           }));
         });
     },
-    [runResult.equity_points, runResult.is_simulated],
+    [runResult.equity_points],
   );
 
   // 基准曲线直接使用累计收益率（%），与组合收益率同轴，无需换算成金额。
@@ -184,7 +183,7 @@ export function StrategySandboxPage() {
             onBenchmarkChange={handleBenchmarkChange}
             onRun={handleRun}
             isPending={isPending}
-            durationMs={runResult.duration_ms}
+            durationMs={runResult.duration_ms || null}
           />
 
           {/* Performance & Charts Panel */}
