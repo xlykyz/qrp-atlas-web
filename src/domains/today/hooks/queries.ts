@@ -5,7 +5,7 @@ import { addCalendarDays, shanghaiToday } from '../lib/deriveToday';
 
 export const todayKeys = {
   all: ['today'] as const,
-  dates: (through: string) => [...todayKeys.all, 'dates', through] as const,
+  dates: (through: string, limit: number) => [...todayKeys.all, 'dates', through, limit] as const,
   health: () => [...todayKeys.all, 'health'] as const,
   stats: () => [...todayKeys.all, 'stats'] as const,
   daily: (date: string) => [...todayKeys.all, 'daily', date] as const,
@@ -17,11 +17,12 @@ export const todayKeys = {
   visits: () => [...todayKeys.all, 'visits'] as const,
 };
 
-export function useTradingDates() {
+/** limit 为交易日条数上限（默认 30，约 1.5 个月）；回测类页面需要更长历史时显式传入更大值。 */
+export function useTradingDates(limit = 30) {
   const through = shanghaiToday();
   return useQuery({
-    queryKey: todayKeys.dates(through),
-    queryFn: () => todayApi.listTradingDates(through),
+    queryKey: todayKeys.dates(through, limit),
+    queryFn: () => todayApi.listTradingDates(through, limit),
     staleTime: 5 * 60_000,
   });
 }

@@ -13,7 +13,9 @@ import { sandboxApi } from '../api/sandboxApi';
 import type { SandboxBenchmarkSeriesPoint, SandboxRunResponse } from '../types/sandbox';
 
 export function StrategySandboxPage() {
-  const dates = useTradingDates();
+  // 沙盒需要回溯长历史区间，取全量交易日（接口上限 10000 条，覆盖 1990 年至今）；
+  // 若沿用今日页面的默认 30 条，日历会被限制在最近一个多月。
+  const dates = useTradingDates(10000);
   const availableDates = dates.data?.dates;
 
   // Derive initial start and end dates from trading calendar with fallback
